@@ -54,7 +54,6 @@ CLANG="$(xcrun --find clang++)"
     -nostdlib \
     -isystem "$KERNEL_HEADERS" \
     -I"$ROOT/MT7902Wlan" \
-    -D"KEXT_VERSION=\\"$VERSION\\"" \
     -Wall -Wextra -Werror \
     -c "$ROOT/MT7902Wlan/MT7902Wlan.cpp" \
     -o "$ROOT/build/MT7902Wlan.o"
