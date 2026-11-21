@@ -37,6 +37,8 @@ MSG
     exit 2
 fi
 
+BUNDLE_VERSION="$(printf '%s' "$VERSION" | sed -E 's/[^0-9.].*$//')"
+if [[ -z "$BUNDLE_VERSION" ]]; then BUNDLE_VERSION="0.1.0"; fi
 mkdir -p "$(dirname "$BIN")"
 rm -f "$BIN"
 
@@ -63,7 +65,7 @@ LD="$(xcrun --find ld)"
 
 mkdir -p "$OUT/Contents"
 cp "$ROOT/MT7902Wlan/Info.plist" "$OUT/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$OUT/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" "$OUT/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $BUNDLE_VERSION" "$OUT/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUNDLE_VERSION" "$OUT/Contents/Info.plist"
 
 echo "Built $OUT"
