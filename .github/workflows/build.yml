@@ -57,11 +57,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ ! -x Scripts/build.sh ]]; then
-            echo "::error::Scripts/build.sh is not present or is not executable yet. Add the KEXT build script before running this workflow."
+          if [[ ! -f Scripts/build.sh ]]; then
+            echo "::error::Scripts/build.sh is missing."
             exit 1
           fi
-          VERSION="$Version" Scripts/build.sh
+          VERSION="$Version" bash Scripts/build.sh
 
       - name: Package build output
         shell: bash
