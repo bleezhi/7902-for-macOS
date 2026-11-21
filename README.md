@@ -3,7 +3,7 @@
 An experimental macOS kernel extension for the MediaTek MT7902 (PCI ID
 `14C3:7902`) wireless controller.
 
-**Status: early development — read-only PCI probe only. No Wi-Fi interface yet.**
+**Status: early development — PCI attach and BAR0 mapping code added; hardware validation and Wi-Fi integration are not done.**
 
 ## Current milestone
 
@@ -12,11 +12,13 @@ The first driver milestone is intentionally conservative:
 - Match the MediaTek vendor/device ID `14C3:7902`.
 - Attach to the PCI function through IOKit.
 - Read the PCI vendor and device IDs.
-- Map BAR0 and report its size.
+- Open the PCI provider, enable PCI memory decoding (restoring its previous state on detach), map BAR0 and report its size.
 - Expose the detected IDs and BAR size as IOKit properties.
 
 It does **not** enable bus mastering, DMA, interrupts, device resets, firmware
-loading, or power/ownership transitions. It does not register an AirPort or
+loading, or MT7902 power/ownership transitions. It does enable PCI memory
+space decoding, which is required to map BAR0, and restores the prior setting
+when it detaches. It does not register an AirPort or
 802.11 network interface.
 
 The Linux `mt76` driver is being used as a hardware-behaviour reference. Its
