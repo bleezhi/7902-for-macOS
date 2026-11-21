@@ -15,6 +15,8 @@ bool MT7902Wlan::init(OSDictionary *dictionary)
 
     fPCIDevice = nullptr;
     fBAR0 = nullptr;
+    fProviderOpened = false;
+    fMemoryWasEnabled = false;
     return true;
 }
 
@@ -44,12 +46,23 @@ bool MT7902Wlan::start(IOService *provider)
      * no bus mastering, DMA, interrupts, reset, firmware or ownership
      * transitions are enabled here.
      */
+    if (!pci->open(this)) {
+        IOLog("MT7902Wlan: could not open PCI provider\\n");
+        return false;
+    }
+
+    fProviderOpened = true;
+    fMemoryWasEnabled = pci->setMemoryEnable(true);
     fPCIDevice = pci;
     fPCIDevice->retain();
 
     fBAR0 = fPCIDevice->mapDeviceMemoryWithIndex(0);
     if (fBAR0 == nullptr) {
         IOLog("MT7902Wlan: unable to map BAR0; PCI attach aborted\n");
+        if (!fMemoryWasEnabled)
+            fPCIDevice->setMemoryEnable(false);
+        fPCIDevice->close(this);
+        fProviderOpened = false;
         fPCIDevice->release();
         fPCIDevice = nullptr;
         return false;
@@ -83,6 +96,12 @@ void MT7902Wlan::stop(IOService *provider)
     }
 
     if (fPCIDevice != nullptr) {
+        if (!fMemoryWasEnabled)
+            fPCIDevice->setMemoryEnable(false);
+        if (fProviderOpened) {
+            fPCIDevice->close(this);
+            fProviderOpened = false;
+        }
         fPCIDevice->release();
         fPCIDevice = nullptr;
     }
