@@ -42,12 +42,12 @@ bool MT7902Wlan::start(IOService *provider)
     }
 
     /*
-     * Keep this first milestone deliberately read-only:
-     * no bus mastering, DMA, interrupts, reset, firmware or ownership
-     * transitions are enabled here.
+     * This first milestone only enables PCI memory decoding so BAR0 can be
+     * mapped. It does not enable bus mastering, DMA, interrupts, device
+     * reset, firmware loading or MT7902 power/ownership transitions.
      */
     if (!pci->open(this)) {
-        IOLog("MT7902Wlan: could not open PCI provider\\n");
+        IOLog("MT7902Wlan: could not open PCI provider\n");
         return false;
     }
 
