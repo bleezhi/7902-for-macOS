@@ -3,7 +3,7 @@
 
 #include <IOKit/IOService.h>
 #include <IOKit/pci/IOPCIDevice.h>
-#include <IOKit/IOMemoryMap.h>
+#include <IOKit/IOMemoryDescriptor.h>
 
 class MT7902Wlan final : public IOService
 {
