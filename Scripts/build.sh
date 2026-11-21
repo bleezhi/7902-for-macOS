@@ -55,7 +55,7 @@ CLANG="$(xcrun --find clang++)"
     -nostdlib \
     -isystem "$KERNEL_HEADERS" \
     -I"$ROOT/MT7902Wlan" \
-    -Wall -Wextra -Werror \
+    -Wall -Wextra -Werror -Wno-deprecated-declarations \
     -c "$ROOT/MT7902Wlan/MT7902Wlan.cpp" \
     -o "$ROOT/build/MT7902Wlan.o"
 
