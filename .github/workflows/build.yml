@@ -1,0 +1,109 @@
+name: Build MT7902 for macOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      Version:
+        description: "Version to build and optionally publish (without a leading v)"
+        required: true
+        type: string
+        default: "0.1.0-alpha.1"
+      RELEASE-AS-PRERELEASE:
+        description: "Publish the GitHub Release as a prerelease"
+        required: true
+        type: boolean
+        default: true
+      IsRelease:
+        description: "Create/push the v<Version> tag and publish a GitHub Release"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build KEXT
+    runs-on: macos-15
+    env:
+      Version: ${{ inputs.Version }}
+      RELEASE_AS_PRERELEASE: ${{ inputs['RELEASE-AS-PRERELEASE'] }}
+      IsRelease: ${{ inputs.IsRelease }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate workflow inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$Version" ]]; then
+            echo "::error::Version cannot be empty."
+            exit 1
+          fi
+          if [[ "$Version" == v* ]]; then
+            echo "::error::Enter Version without the leading v (for example: 0.1.0-alpha.1)."
+            exit 1
+          fi
+          echo "Building version: $Version"
+          echo "Release prerelease: $RELEASE_AS_PRERELEASE"
+          echo "Publish release: $IsRelease"
+
+      - name: Build KEXT
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -x Scripts/build.sh ]]; then
+            echo "::error::Scripts/build.sh is not present or is not executable yet. Add the KEXT build script before running this workflow."
+            exit 1
+          fi
+          VERSION="$Version" Scripts/build.sh
+
+      - name: Package build output
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          if [[ -d build ]]; then
+            ditto build dist
+          fi
+          if [[ -d dist ]] && [[ -n "$(find dist -type f -print -quit)" ]]; then
+            ditto -c -k --sequesterRsrc --keepParent dist "MT7902-for-macOS-$Version.zip"
+          else
+            echo "::error::Build completed but produced no files in build/."
+            exit 1
+          fi
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MT7902-for-macOS-${{ inputs.Version }}
+          path: MT7902-for-macOS-${{ inputs.Version }}.zip
+          if-no-files-found: error
+
+      - name: Create and push version tag
+        if: ${{ inputs.IsRelease }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="v$Version"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG already exists."
+            exit 1
+          fi
+          git tag -a "$TAG" -m "MT7902 for macOS $Version"
+          git push origin "$TAG"
+
+      - name: Publish GitHub Release
+        if: ${{ inputs.IsRelease }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.Version }}
+          name: MT7902 for macOS ${{ inputs.Version }}
+          prerelease: ${{ inputs['RELEASE-AS-PRERELEASE'] }}
+          files: MT7902-for-macOS-${{ inputs.Version }}.zip
+          generate_release_notes: true
