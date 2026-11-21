@@ -12,6 +12,8 @@ class MT7902Wlan final : public IOService
 private:
     IOPCIDevice *fPCIDevice;
     IOMemoryMap *fBAR0;
+    bool fProviderOpened;
+    bool fMemoryWasEnabled;
 
 public:
     bool init(OSDictionary *dictionary = nullptr) override;
