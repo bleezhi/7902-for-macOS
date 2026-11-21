@@ -52,7 +52,7 @@ Output:
 build/MT7902Wlan.kext/
 ```
 
-The KEXT is not yet suitable for everyday use. Kernel extensions run in kernel
+The KEXT is not yet suitable for everyday use (**yet!**). Kernel extensions run in kernel
 space; only test on a system where you can recover through your OpenCore EFI.
 
 ## Planned work
