@@ -45,6 +45,7 @@ rm -f "$BIN"
 CLANG="$(xcrun --find clang++)"
 "$CLANG" \
     -arch x86_64 \
+    -DKERNEL \
     -mkernel \
     -fapple-kext \
     -fno-exceptions \
