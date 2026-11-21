@@ -82,7 +82,7 @@ bool MT7902Wlan::start(IOService *provider)
     setProperty("MT7902,BAR0-Length", (unsigned long long)fBAR0->getLength(), 64);
 
     registerService();
-    IOLog("MT7902Wlan: read-only PCI probe attached successfully\n");
+    IOLog("MT7902Wlan: PCI probe attached; BAR0 ready\n");
     return true;
 }
 
